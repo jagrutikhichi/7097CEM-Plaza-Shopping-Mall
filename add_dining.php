@@ -1,0 +1,170 @@
+<?php
+session_start();
+include("config.php");
+
+if (!isset($_SESSION["admin"])) {
+    header("Location: admin_login.php");
+    exit();
+}
+
+$msg = "";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $name = $_POST["name"];
+    $description = $_POST["description"];
+    $location = $_POST["location"];
+    $price = $_POST["price"];
+    $offer_price = $_POST["offer_price"];
+
+    if (!is_dir("uploads")) {
+        mkdir("uploads", 0777, true);
+    }
+
+    $target = "uploads/" . basename($_FILES["image"]["name"]);
+
+    if (move_uploaded_file($_FILES["image"]["tmp_name"], $target)) {
+        $stmt = $conn->prepare("INSERT INTO dining (name, description, location, image, price, offer_price) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssssdd", $name, $description, $location, $target, $price, $offer_price);
+        
+        if ($stmt->execute()) {
+            echo "<script>alert('Dining added successfully!'); window.location='manage_dining.php';</script>";
+            exit();
+        } else {
+            echo "<script>alert('Error: " . $conn->error . "');</script>";
+        }
+    } else {
+        echo "<script>alert('Image upload failed.');</script>";
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Dining - Plaza Shopping Mall</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/styles.css">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            background: url('assets/dining_bg.jpg') no-repeat center center fixed;
+            background-size: cover;
+            font-family: Arial, sans-serif;
+        }
+
+        .navbar {
+            background: rgba(0, 0, 0, 0.85) !important;
+        }
+
+        .navbar-brand {
+            font-size: 28px;
+            font-weight: bold;
+            color: white !important;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-brand img {
+            height: 50px;
+            margin-right: 15px;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 25px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        footer {
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            text-align: center;
+            padding: 15px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand" href="admin_dashboard.php">
+            <img src="uploads/logo.png" alt="Plaza Logo">
+            Plaza Shopping Mall
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="admin_dashboard.php">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link btn btn-danger text-white" href="logout.php">Logout</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="content-wrapper">
+    <div class="form-container">
+        <h2 class="text-center mb-4" style="font-weight: bold;">Add New Dining</h2>
+        <form method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label class="form-label">Dining Name</label>
+                <input type="text" class="form-control" name="name" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea class="form-control" name="description" required></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Location</label>
+                <input type="text" class="form-control" name="location" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Price ($)</label>
+                <input type="number" class="form-control" name="price" step="0.01" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Offer Price ($) <span class="text-muted">(Optional)</span></label>
+                <input type="number" class="form-control" name="offer_price" step="0.01">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Upload Dining Image</label>
+                <input type="file" class="form-control" name="image" accept="image/*" required>
+            </div>
+
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Add Dining</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<footer>
+    <p>&copy; 2025 Plaza Shopping Mall Admin Panel. All Rights Reserved.</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
