@@ -107,7 +107,7 @@ $events = $conn->query("SELECT * FROM events WHERE event_date >= CURDATE()");
                                     <p class="card-text"><strong>Date:</strong> <?= htmlspecialchars($event['event_date']); ?></p>
                                     <p class="card-text"><strong>Location:</strong> <?= htmlspecialchars($event['location']); ?></p>
                                     <p class="card-text">
-                                        <strong>Price:</strong> <del>$<?= number_format($event['price'], 2); ?></del>
+                                        <strong>Price:</strong> $<?= number_format($event['price'], 2); ?>
                                         <?php if (!empty($event['offer_price']) && $event['offer_price'] < $event['price']): ?>
                                             <span class="text-success fw-bold">$<?= number_format($event['offer_price'], 2); ?></span>
                                             <span class="badge bg-danger"><?= round(100 - ($event['offer_price'] / $event['price'] * 100)) ?>% Off</span>

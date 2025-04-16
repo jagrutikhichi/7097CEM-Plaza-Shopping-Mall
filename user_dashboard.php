@@ -11,7 +11,7 @@ if (!isset($_SESSION["user"])) {
 $products = $conn->query("SELECT * FROM products");
 
 // Fetch client products (i.e., products added by clients)
-$client_products = $conn->query("SELECT cp.*, c.name AS client_name FROM client_product cp JOIN clients c ON cp.client_id = c.id");
+$products = $conn->query("SELECT p.id, p.name, p.category, p.image, p.description, p.price, p.offer_price, p.quantity FROM products p");
 
 ?>
 
@@ -128,12 +128,13 @@ $client_products = $conn->query("SELECT cp.*, c.name AS client_name FROM client_
                                 <p class="card-text"><strong>Category:</strong> <?= $row["category"]; ?></p>
                                 <p class="card-text">
                                     <strong>Price:</strong> <del>$<?= number_format($row["price"], 2); ?></del>
-                                    <?php if (!empty($row["offer_price"]) && $row["offer_price"] < $row["price"]): ?>
-                                        <span class="text-success fw-bold">$<?= number_format($row["offer_price"], 2); ?></span>
-                                        <span class="badge bg-danger"><?= round(100 - ($row["offer_price"] / $row["price"] * 100)) ?>% Off</span>
-                                    <?php else: ?>
-                                        <span class="text-muted">No Discount</span>
-                                    <?php endif; ?>
+                                    <?php if (!empty($row["offer_price"]) && $row["offer_price"] > 0 && $row["offer_price"] < $row["price"]): ?>
+    <del class="text-muted">$<?= number_format($row["price"], 2); ?></del>
+    <span class="text-success fw-bold">$<?= number_format($row["offer_price"], 2); ?></span>
+    <span class="badge bg-danger"><?= round(100 - ($row["offer_price"] / $row["price"] * 100)) ?>% Off</span>
+<?php else: ?>
+    <span class="text-dark fw-bold">$<?= number_format($row["price"], 2); ?></span>
+<?php endif; ?>
                                 </p>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <input type="number" class="form-control quantity-input" name="quantity" value="1" min="1">

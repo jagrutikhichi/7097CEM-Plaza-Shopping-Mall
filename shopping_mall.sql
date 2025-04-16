@@ -22,6 +22,16 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Client Table
+
+CREATE TABLE clients (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Products Table
 CREATE TABLE products (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -56,7 +66,7 @@ CREATE TABLE orders (
     total_amount DECIMAL(10,2) NOT NULL,
     payment_method VARCHAR(50) NOT NULL,
     order_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('Confirmed', 'Canceled') DEFAULT 'Confirmed',
+    status ENUM('Pending', 'Confirmed', 'Out for Delivery', 'Delivered' ,'Canceled') DEFAULT 'Confirmed',
     FOREIGN KEY (user_email) REFERENCES users(email) ON DELETE CASCADE
 );
 
@@ -99,6 +109,7 @@ CREATE TABLE dining (
     offer_price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 
 -- Dining Booking Table
 CREATE TABLE booking_dining (
