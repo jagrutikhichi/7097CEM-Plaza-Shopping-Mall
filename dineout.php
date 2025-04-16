@@ -85,10 +85,7 @@ $dining = $conn->query("SELECT * FROM dining");
                     <?php while ($dine = $dining->fetch_assoc()): ?>
                         <div class="col-md-4 mb-4">
                             <div class="card h-100">
-                                <img src="uploads/<?= htmlspecialchars($dine['image']); ?>" 
-                                     class="card-img-top" 
-                                     alt="<?= htmlspecialchars($dine['name']); ?>"
-                                     onerror="this.onerror=null; this.src='assets/default_dining.jpg';">
+                            <img src="<?= !empty($dine['image']) ? htmlspecialchars($dine['image']) : 'assets\default_dining.jpg'; ?>" alt="Dining Image">
                                 <div class="card-body">
                                     <h5 class="card-title"> <?= htmlspecialchars($dine['name']); ?> </h5>
                                     <p class="card-text"> <?= htmlspecialchars($dine['description']); ?> </p>

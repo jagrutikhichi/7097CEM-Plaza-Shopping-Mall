@@ -97,10 +97,7 @@ $events = $conn->query("SELECT * FROM events WHERE event_date >= CURDATE()");
                     <?php while ($event = $events->fetch_assoc()): ?>
                         <div class="col-md-4 mb-4">
                             <div class="card h-100">
-                                <img src="uploads/<?= htmlspecialchars($event['image']); ?>" 
-                                     class="card-img-top" 
-                                     alt="<?= htmlspecialchars($event['title']); ?>"
-                                     onerror="this.onerror=null; this.src='assets/default_event.jpg';">
+                            <img src="<?= !empty($event['image']) ? htmlspecialchars($event['image']) : 'default.jpg'; ?>" alt="Event Image">
                                 <div class="card-body">
                                     <h5 class="card-title"> <?= htmlspecialchars($event['title']); ?> </h5>
                                     <p class="card-text"> <?= htmlspecialchars($event['description']); ?> </p>

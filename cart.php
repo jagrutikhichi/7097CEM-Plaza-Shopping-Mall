@@ -8,19 +8,42 @@ if (!isset($_SESSION["user"])) {
 }
 
 // Handle cart operations
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_cart"])) {
-    $id = $_POST["id"];
-    $qty = max(1, (int)$_POST["quantity"]);
-    if (isset($_SESSION["cart"][$id])) {
-        $_SESSION["cart"][$id]["quantity"] = $qty;
-        $price = ($_SESSION["cart"][$id]["offer_price"] != "N/A" && $_SESSION["cart"][$id]["offer_price"] < $_SESSION["cart"][$id]["original_price"])
-            ? $_SESSION["cart"][$id]["offer_price"] : $_SESSION["cart"][$id]["original_price"];
-        $subtotal = $price * $qty;
-        $total = array_sum(array_map(fn($item) => (($item["offer_price"] != "N/A" && $item["offer_price"] < $item["original_price"]) ? $item["offer_price"] : $item["original_price"]) * $item["quantity"], $_SESSION["cart"]));
+if (isset($_POST["remove"])) {
+    $product_id = intval($_POST["product_id"]);
 
-        echo json_encode(["subtotal" => number_format($subtotal, 2), "total" => number_format($total, 2)]);
+    // If using session-based cart
+    if (isset($_SESSION["cart"][$product_id])) {
+        unset($_SESSION["cart"][$product_id]);
     }
-    exit();
+
+    // If using database-based cart
+    $user_id = $_SESSION["user_id"]; // Assuming user_id is stored in the session
+    $query = "DELETE FROM cart WHERE user_id = ? AND product_id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("ii", $user_id, $product_id);
+    $stmt->execute();
+    $stmt->close();
+
+    header("Location: cart.php");
+    exit;
+}
+?>
+
+<?php
+if (isset($_POST["clear"])) {
+    // If using session-based cart
+    unset($_SESSION["cart"]);
+
+    // If using database-based cart
+    $user_id = $_SESSION["user_id"]; // Assuming user_id is stored in the session
+    $query = "DELETE FROM cart WHERE user_id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $stmt->close();
+
+    header("Location: cart.php");
+    exit;
 }
 ?>
 
@@ -148,7 +171,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_cart"])) {
                                 </td>
                                 <td id="subtotal_<?= $id; ?>">$<?= number_format($subtotal, 2); ?></td>
                                 <td>
-                                    <a href="cart.php?remove=<?= $id; ?>" class="btn btn-danger btn-sm">Remove</a>
+                                    
+                                    <form method="POST" action="cart.php" class="d-inline">
+                                        <input type="hidden" name="product_id" value="<?= $id; ?>">
+                                        <button type="submit" name="remove" class="btn btn-danger btn-sm">Remove</button>
+                                    </form>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -156,7 +183,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_cart"])) {
                             <td colspan="6"><strong>Total:</strong></td>
                             <td><strong id="total">$<?= number_format($total, 2); ?></strong></td>
                             <td class="cart-buttons">
-                                <a href="cart.php?clear=true" class="btn btn-warning btn-sm">Clear Cart</a>
+                                <!-- Clear Button -->
+<form method="POST" action="cart.php">
+    <button type="submit" name="clear" class="btn btn-warning">Clear Basket</button>
+</form>
                                 <a href="checkout.php" class="btn btn-success btn-sm">Checkout</a>
                             </td>
                         </tr>
